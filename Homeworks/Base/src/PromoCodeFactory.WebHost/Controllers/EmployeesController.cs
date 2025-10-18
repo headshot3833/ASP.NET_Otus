@@ -42,7 +42,25 @@ namespace PromoCodeFactory.WebHost.Controllers
 
             return employeesModelList;
         }
-
+        /// <summary>
+        /// Удаление сотрудника из бд
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        [HttpDelete]
+        public async Task<ActionResult> DeleteEmployeAsync(Guid id)
+        {
+            try
+            {
+                await _employeeRepository.DeleteUser(id);
+                return Ok($"удален сотрудник с id {id}");
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            
+        }
         /// <summary>
         /// Получить данные сотрудника по Id
         /// </summary>
@@ -69,6 +87,43 @@ namespace PromoCodeFactory.WebHost.Controllers
             };
 
             return employeeModel;
+        }
+        /// <summary>
+        /// обновление сотрудника
+        /// </summary>
+        /// <param name="employee"></param>
+        /// <returns></returns>
+        [HttpPut]
+        public ActionResult<EmployeeResponse> updateEmploye(Employee employee)
+        {
+            try
+            {
+                _employeeRepository.UpdateUser(employee);
+                return Ok($"Данные сотрудника  {employee.FullName} обновленны");
+            }
+            catch (Exception ex) {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [HttpPost]
+        public ActionResult<EmployeeResponse> CreateEmploye(Employee employee)
+        {
+            Employee employe = new()
+            {
+                Email = employee.Email,
+                FirstName = employee.FirstName,
+                LastName = employee.LastName,
+                Roles = new List<Role>()
+                {
+                    new Role
+                    {
+                        Name = "User"
+                    }
+                }
+            };
+            return Ok();
+            
         }
     }
 }
