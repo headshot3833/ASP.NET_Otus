@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using PromoCodeFactory.Core.Abstractions.Repositories;
 using PromoCodeFactory.Core.Domain.Administration;
+using PromoCodeFactory.WebHost.DTO;
 using PromoCodeFactory.WebHost.Models;
 
 namespace PromoCodeFactory.WebHost.Controllers
@@ -107,10 +108,11 @@ namespace PromoCodeFactory.WebHost.Controllers
         }
 
         [HttpPost]
-        public ActionResult<EmployeeResponse> CreateEmploye(Employee employee)
+        public ActionResult<EmployeeResponse> CreateEmploye(EmployeDTO employee)
         {
             Employee employe = new()
             {
+                Id = Guid.NewGuid(),
                 Email = employee.Email,
                 FirstName = employee.FirstName,
                 LastName = employee.LastName,
@@ -122,8 +124,16 @@ namespace PromoCodeFactory.WebHost.Controllers
                     }
                 }
             };
-            return Ok();
-            
+            try
+            {
+                _employeeRepository.CreateUser(employe);
+                return Ok($"Добавлен пользователю {employe.FullName} в систему");
+            }
+            catch
+            {
+                return BadRequest($"Не получилось добавить пользователя{employee.FullName}");
+            }
+
         }
     }
 }
