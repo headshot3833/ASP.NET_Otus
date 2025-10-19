@@ -5,7 +5,18 @@
     </PropertyGroup>
 
     <ItemGroup>
+      <PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.10" />
+      <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite.Core" Version="9.0.10" />
+      <PackageReference Include="SQLitePCLRaw.bundle_e_sqlite3" Version="3.0.2" />
+    </ItemGroup>
+
+    <ItemGroup>
       <ProjectReference Include="..\PromoCodeFactory.Core\PromoCodeFactory.Core.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Folder Include="EntityFramework\" />
+      <Folder Include="PromoCodeFactory\" />
     </ItemGroup>
 
 </Project>
