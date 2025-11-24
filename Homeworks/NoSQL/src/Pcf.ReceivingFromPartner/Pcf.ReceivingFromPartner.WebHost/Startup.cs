@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -17,6 +17,9 @@ using Pcf.ReceivingFromPartner.DataAccess.Data;
 using Pcf.ReceivingFromPartner.DataAccess.Repositories;
 using Pcf.ReceivingFromPartner.Integration;
 using IConfiguration = Microsoft.Extensions.Configuration.IConfiguration;
+using Pcf.ReceivingFromPartner.Core.Abstractions.Redis;
+using Pcf.ReceivingFromPartner.Core.Services.Redis;
+using Pcf.ReceivingFromPartner.Core.Domain;
 
 namespace Pcf.ReceivingFromPartner.WebHost
 {
@@ -38,6 +41,7 @@ namespace Pcf.ReceivingFromPartner.WebHost
             services.AddScoped(typeof(IRepository<>), typeof(EfRepository<>));
             services.AddScoped<INotificationGateway, NotificationGateway>();
             services.AddScoped<IDbInitializer, EfDbInitializer>();
+            services.AddSingleton<IPreferenceCacheService, PreferenceCacheService>();
 
             services.AddHttpClient<IGivingPromoCodeToCustomerGateway,GivingPromoCodeToCustomerGateway>(c =>
             {
@@ -48,7 +52,10 @@ namespace Pcf.ReceivingFromPartner.WebHost
             {
                 c.BaseAddress = new Uri(Configuration["IntegrationSettings:AdministrationApiUrl"]);
             });
-            
+            services.AddStackExchangeRedisCache(options =>
+            {
+                options.Configuration = "localhost:6379";
+            });
             services.AddDbContext<DataContext>(x =>
             {
                 //x.UseSqlite("Filename=PromocodeFactoryReceivingFromPartnerDb.sqlite");
@@ -56,7 +63,10 @@ namespace Pcf.ReceivingFromPartner.WebHost
                 x.UseSnakeCaseNamingConvention();
                 x.UseLazyLoadingProxies();
             });
-
+            services.AddStackExchangeRedisCache(options =>
+            {
+                options.Configuration = "localhost:6379";
+            });
             services.AddOpenApiDocument(options =>
             {
                 options.Title = "PromoCode Factory Receiving From Partner API Doc";
@@ -92,6 +102,24 @@ namespace Pcf.ReceivingFromPartner.WebHost
             });
             
             dbInitializer.InitializeDb();
+            using (var scope = app.ApplicationServices.CreateScope())
+            {
+                var cache = scope.ServiceProvider.GetRequiredService<IPreferenceCacheService>();
+
+                // загрузка начальных данных
+                cache.SetAsync("театр", new Preference()
+                {
+                    Id = Guid.Parse("ef7f299f-92d7-459f-896e-078ed53ef99c"),
+                    Name = "Театр",
+                }).Wait();
+                cache.SetAsync("семья",new Preference()
+                {
+                    Id = Guid.Parse("c4bda62e-fc74-4256-a956-4760b3858cbd"),
+                    Name = "Семья",
+                }).Wait();
+                cache.SetAsync("Дети", new Preference()
+                {Id = Guid.Parse("76324c47-68d2-472d-abb8-33cfa8cc0c84"),Name = "Дети",}).Wait();
+            }
         }
     }
 }

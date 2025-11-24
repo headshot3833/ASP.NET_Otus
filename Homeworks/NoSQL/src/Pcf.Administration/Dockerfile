@@ -19,3 +19,4 @@ WORKDIR /app
 COPY --from=build /app/aspnetapp/out ./
 EXPOSE 8080
 ENTRYPOINT ["dotnet", "Pcf.Administration.WebHost.dll"]
+

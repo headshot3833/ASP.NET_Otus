@@ -63,3 +63,8 @@ services:
       - "ConnectionStrings:PromocodeFactoryGivingToCustomerDb=Host=promocode-factory-giving-to-customer-db;Database=promocode_factory_giving_to_customer_db;Username=postgres;Password=docker"          
     depends_on: 
       - promocode-factory-giving-to-customer-db
+  redis:
+    image: redis:7
+    container_name: redis
+    ports:
+      - "6379:6379"
